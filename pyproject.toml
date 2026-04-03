@@ -1,0 +1,29 @@
+[project]
+name = "qa-auto-engineer-python-project-314"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "allure-pytest>=2.15.3",
+    "dotenv>=0.9.9",
+    "pytest>=9.0.2",
+    "pytest-rerunfailures>=16.1",
+    "selenium>=4.41.0",
+]
+
+[tool.pytest.ini_options]
+addopts = "-vv --tb=auto"
+testpaths = ["tests"]
+markers = [
+    "smoke: mark a test as part of smoke tests",
+    "regression: mark a test as part of regression tests",
+]
+reruns = 2
+reruns_delay = 1
+
+[dependency-groups]
+dev = [
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.15.9",
+    "ty>=0.0.28",
+]
