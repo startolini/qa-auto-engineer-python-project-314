@@ -4,17 +4,18 @@ from pages.dashboard_page import DashboardPage
 from pages.users_page import UsersPage
 from pages.task_statuses_page import TaskStatusesPage
 from pages.labels_page import LabelsPage
+from pages.tasks_page import TasksPage
 
 
 @pytest.mark.smoke
-def test_login_successfull(driver, login_url):
+def test_login_successfull(driver, login_url, base_url):
 
     login_page = LoginPage(driver)
     login_page.open(login_url)
     login_page.login("user", "password")
 
-    assert login_page.submit_button_not_visile(), (
-        "Submit button should not be visible after login"
+    assert driver.current_url == base_url + "/#/", (
+        "Should redirect to dashboard after login"
     )
 
 
@@ -233,7 +234,7 @@ def test_label_editing(login_user):
     assert a == "test"
 
 
-@pytest.mark.one
+@pytest.mark.smoke
 def test_delete_label(login_user):
     page = DashboardPage(login_user)
     page.menu.open_labels()
@@ -244,3 +245,27 @@ def test_delete_label(login_user):
     assert "task" not in labels.get_labels_text(), (
         "Deleted label should not be visible in the table"
     )
+
+
+# @pytest.mark.window_size(875, 612)
+@pytest.mark.one
+def test_scroll_to_specific_card(login_user):
+    page = DashboardPage(login_user)
+    page.menu.open_tasks()
+    tasks = TasksPage(login_user)
+    # Получаем все карточки
+    cards = tasks.get_all_cards_in_draft()
+    
+    # Скроллим к последней карточке
+    if cards:
+        last_card = cards[-1]
+        tasks.by_js.scroll_into_view(last_card)
+        
+        # Или используем метод из TasksPage
+        tasks.scroll_to_card(last_card)
+        
+        # Проверяем, что карточка видна
+        assert last_card.is_displayed()
+        print(f"Scrolled to card: {last_card.get_attribute('data-rfd-draggable-id')}")
+        import time
+        time.sleep(5)

@@ -32,7 +32,7 @@ class LabelsPage(BasePage):
         return self.is_visible(self.NAME_INPUT)
 
     def create_label(self, name: str) -> None:
-        self.type(self.NAME_INPUT, name)
+        self.by_js.type(self.NAME_INPUT, name)
         self.click(self.SAVE_BUTTON)
 
     def get_value_from_table(self, name: str) -> str:

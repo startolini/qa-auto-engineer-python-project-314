@@ -4,7 +4,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from utils.by_js import ByJS
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
 from pages.side_menu_widget import SideMenuWidget
 from utils.utils import get_os
 
@@ -35,13 +34,7 @@ class BasePage:
 
     def type(self, locator: tuple, text: str) -> None:
         el = self.wait.until(EC.visibility_of_element_located(locator))
-        self.actions.click(el)
-        self.actions.key_down(
-            Keys.COMMAND if get_os() == "mac" else Keys.CONTROL
-        ).send_keys("a").key_up(Keys.COMMAND)
-        self.actions.send_keys(Keys.BACKSPACE)
-        self.actions.perform()
-
+        el.clear()
         el.send_keys(text)
 
     def get_text(self, locator: tuple) -> str:

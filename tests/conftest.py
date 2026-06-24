@@ -17,10 +17,7 @@ def pytest_configure(config):
     out_dir.mkdir(parents=True, exist_ok=True)
     config.option.allure_report_dir = str(out_dir)
 
-    old_reports = sorted(
-        pathlib.Path("reports").glob("allure-results-*"),
-        key=lambda p: p.stat().st_mtime,
-    )
+    old_reports = sorted(pathlib.Path("reports").glob("allure-results-*"), key=lambda p: p.stat().st_mtime)
     for report in old_reports[:-5]:
         shutil.rmtree(report)
 
@@ -54,15 +51,34 @@ def login_url():
 
 
 @pytest.fixture
-def driver():
+def driver(request):
     options = Options()
     options.add_argument("--window-size=1366,768")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-infobars")
-    driver = webdriver.Chrome(options=options)
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--allow-insecure-localhost")
+    options.add_argument("--disable-web-security")
+
+    chrome_bin = os.environ.get("CHROME_BIN")
+    chromedriver_path = os.environ.get("CHROMEDRIVER_PATH")
+
+    if chrome_bin:
+        options.binary_location = chrome_bin
+
+    from selenium.webdriver.chrome.service import Service
+    service = Service(executable_path=chromedriver_path) if chromedriver_path else Service()
+
+    driver = webdriver.Chrome(service=service, options=options)
+    marker = request.node.get_closest_marker("window_size")
+    if marker:
+        width, height = marker.args
+        driver.set_window_size(width, height)
     yield driver
     driver.quit()
+
 
 
 @pytest.fixture

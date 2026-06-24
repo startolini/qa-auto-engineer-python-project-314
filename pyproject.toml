@@ -17,6 +17,7 @@ testpaths = ["tests"]
 markers = [
     "smoke: mark a test as part of smoke tests",
     "regression: mark a test as part of regression tests",
+    "window_size: set browser window size"
 ]
 reruns = 2
 reruns_delay = 1

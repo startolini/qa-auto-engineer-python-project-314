@@ -49,7 +49,7 @@ class UsersPage(BasePage):
     def change_user_email(self, new_email: str):
         self.click(self.EMAIL_INPUT)
         assert is_valid_email(new_email), f"Invalid email: {new_email}"
-        self.type(self.EMAIL_INPUT, new_email)
+        self.by_js.type(self.EMAIL_INPUT, new_email)
         self.click(self.SAVE_BUTTON)
 
     def check_user_in_table(self, email: str, first_name: str, last_name: str) -> bool:

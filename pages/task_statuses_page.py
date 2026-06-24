@@ -34,8 +34,8 @@ class TaskStatusesPage(BasePage):
         return self.is_visible(self.NAME_INPUT) and self.is_visible(self.SLUG_INPUT)
 
     def create_status(self, name: str, slug: str) -> None:
-        self.type(self.NAME_INPUT, name)
-        self.type(self.SLUG_INPUT, slug)
+        self.by_js.type(self.NAME_INPUT, name)
+        self.by_js.type(self.SLUG_INPUT, slug)
         self.click(self.SAVE_BUTTON)
 
     def get_values_from_table(self, name: str, slug: str) -> tuple:
