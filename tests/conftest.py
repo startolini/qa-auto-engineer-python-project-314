@@ -76,6 +76,11 @@ def pytest_runtest_makereport(item, call):
 
 @pytest.fixture
 def base_url():
+    # В среде проверки Hexlet реализации приложения доступны
+    # по адресу http://<implementation>.test
+    implementation = os.environ.get("IMPLEMENTATION")
+    if implementation:
+        return f"http://{implementation}.test"
     return os.environ.get("APP_BASE_URL", DEFAULT_APP_BASE_URL)
 
 
