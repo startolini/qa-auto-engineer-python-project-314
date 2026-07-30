@@ -1,9 +1,11 @@
-from pages.base_page import BasePage
 from selenium.webdriver.common.by import By
-from utils.utils import is_valid_email
+from selenium.webdriver.support import expected_conditions as EC
+from pages.base_list_page import BaseListPage
 
 
-class UsersPage(BasePage):
+class UsersPage(BaseListPage):
+    ROW_KEY_COLUMN = "column-email"
+
     @staticmethod
     def locator_header_constructor(value: str) -> tuple:
         return (
@@ -18,39 +20,32 @@ class UsersPage(BasePage):
             f"//td[contains(@class, 'column')]//span[normalize-space()='{value}']",
         )
 
-    @staticmethod
-    def locator_checkbox_constructor(value: str) -> tuple:
-        return (
-            By.XPATH,
-            f"//tr[.//td[contains(@class, 'column-email')]//span[normalize-space()='{value}']]//input[@type='checkbox']",
-        )
-
-    CREATE_USER_BTN = (By.CSS_SELECTOR, '[aria-label="Create"]')
-    SELECT_ALL_CHECKBOX = (By.CSS_SELECTOR, '[aria-label="Select all"]')
     EMAIL_INPUT = (By.CSS_SELECTOR, '[name="email"]')
     FIRST_NAME_INPUT = (By.CSS_SELECTOR, '[name="firstName"]')
     LAST_NAME_INPUT = (By.CSS_SELECTOR, '[name="lastName"]')
-    SAVE_BUTTON = (By.CSS_SELECTOR, '[aria-label="Save"]')
-    SNACKBAR = (By.CSS_SELECTOR, '[role="alert"]')
-    DELETE_USER_BTN = (By.CSS_SELECTOR, '[aria-label="Delete"]')
-    SELECT_ALL_CHECKBOX = (By.CSS_SELECTOR, '[aria-label="Select all"]')
-    NO_USERS_LOGO = (By.CSS_SELECTOR, '[data-testid="InboxIcon"]')
+    VALIDATION_ERROR = (By.CSS_SELECTOR, "p.MuiFormHelperText-root.Mui-error")
 
-    def creat_user(self, email: str, first_name: str, last_name: str):
-        self.click(self.CREATE_USER_BTN)
+    def check_user_inputs_visible(self) -> bool:
+        return (
+            self.is_visible(self.EMAIL_INPUT)
+            and self.is_visible(self.FIRST_NAME_INPUT)
+            and self.is_visible(self.LAST_NAME_INPUT)
+        )
+
+    def create_user(self, email: str, first_name: str, last_name: str):
         self.type(self.EMAIL_INPUT, email)
         self.type(self.FIRST_NAME_INPUT, first_name)
         self.type(self.LAST_NAME_INPUT, last_name)
-        self.click(self.SAVE_BUTTON)
-
-    def snackbar_visible(self) -> bool:
-        return self.is_visible(self.SNACKBAR)
+        self.click_save()
 
     def change_user_email(self, new_email: str):
         self.click(self.EMAIL_INPUT)
-        assert is_valid_email(new_email), f"Invalid email: {new_email}"
         self.by_js.type(self.EMAIL_INPUT, new_email)
-        self.click(self.SAVE_BUTTON)
+        self.click_save()
+
+    def get_validation_error_text(self) -> str:
+        el = self.wait.until(EC.visibility_of_element_located(self.VALIDATION_ERROR))
+        return el.text
 
     def check_user_in_table(self, email: str, first_name: str, last_name: str) -> bool:
         return (
@@ -80,20 +75,6 @@ class UsersPage(BasePage):
             self.get_dom_attribute(self.LAST_NAME_INPUT, "value") or "",
         )
 
-    def select_user_by_email(self, email: str):
-        el = self.find_element(self.locator_checkbox_constructor(email))
-        self.by_js.click(el)
-
-    def select_all_users(self):
-        el = self.find_element(self.SELECT_ALL_CHECKBOX)
-        self.by_js.click(el)
-
-    def click_delete_btn(self):
-        self.click(self.DELETE_USER_BTN)
-
     def email_not_in_table(self, email: str) -> bool:
         elements = self.find_elements(self.locator_row_constructor(email))
         return len(elements) == 0
-
-    def no_users_logo_visible(self) -> bool:
-        return self.is_visible(self.NO_USERS_LOGO)

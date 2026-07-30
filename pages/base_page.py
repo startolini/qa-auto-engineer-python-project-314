@@ -3,9 +3,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from utils.by_js import ByJS
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.action_chains import ActionChains
 from pages.side_menu_widget import SideMenuWidget
-from utils.utils import get_os
 
 if TYPE_CHECKING:
     from selenium.webdriver.remote.webelement import WebElement
@@ -17,7 +15,6 @@ class BasePage:
         self.wait = WebDriverWait(driver, 10)
         self.menu = SideMenuWidget(self)
         self.by_js = ByJS(driver)
-        self.actions = ActionChains(driver)
 
     def find_element(self, locator: tuple) -> "WebElement":
         return self.driver.find_element(*locator)

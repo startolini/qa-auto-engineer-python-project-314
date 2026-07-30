@@ -14,6 +14,3 @@ class LoginPage(BasePage):
         self.type(self.PASS, password)
         self.click(self.SUBMIT_BTN)
         self.wait.until(EC.url_changes(current_url))
-
-    def submit_button_not_visile(self):
-        return self.wait.until(EC.invisibility_of_element_located(self.SUBMIT_BTN))
