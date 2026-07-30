@@ -137,11 +137,11 @@ class TasksPage(BasePage):
             return False
 
     def card_not_on_board(self, title: str) -> bool:
-        return len(self.find_elements(self.locator_card_constructor(title))) == 0
+        return self.wait_for_absence(self.locator_card_constructor(title))
 
     def card_not_in_column(self, title: str, column: str) -> bool:
         locator = self.locator_card_in_column_constructor(title, column)
-        return len(self.find_elements(locator)) == 0
+        return self.wait_for_absence(locator)
 
     def get_all_cards_in_draft(self):
         """Get all task cards in Draft column"""

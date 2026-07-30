@@ -44,7 +44,7 @@ def test_delete_label(labels_page):
     labels_page.select_row_by_value("task")
     labels_page.click_delete_btn()
 
-    assert "task" not in labels_page.get_labels_text(), (
+    assert labels_page.label_not_in_table("task"), (
         "Deleted label should not be visible in the table"
     )
 

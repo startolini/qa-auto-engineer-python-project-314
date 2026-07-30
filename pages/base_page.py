@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from utils.by_js import ByJS
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from pages.side_menu_widget import SideMenuWidget
 
 if TYPE_CHECKING:
@@ -58,3 +58,11 @@ class BasePage:
 
     def is_not_visible(self, locator: tuple) -> bool:
         return not self.is_visible(locator)
+
+    def wait_for_absence(self, locator: tuple) -> bool:
+        """Дождаться исчезновения элемента (например, удалённой строки)"""
+        try:
+            self.wait.until(EC.invisibility_of_element_located(locator))
+            return True
+        except TimeoutException:
+            return False

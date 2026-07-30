@@ -45,4 +45,4 @@ class TaskStatusesPage(BaseListPage):
         return self.get_texts(self.NAME_COLUMN)
 
     def status_not_in_table(self, name: str) -> bool:
-        return len(self.find_elements(self.locator_name_constructor(name))) == 0
+        return self.wait_for_absence(self.locator_name_constructor(name))

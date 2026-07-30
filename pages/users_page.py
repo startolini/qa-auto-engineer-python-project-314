@@ -76,5 +76,4 @@ class UsersPage(BaseListPage):
         )
 
     def email_not_in_table(self, email: str) -> bool:
-        elements = self.find_elements(self.locator_row_constructor(email))
-        return len(elements) == 0
+        return self.wait_for_absence(self.locator_row_constructor(email))

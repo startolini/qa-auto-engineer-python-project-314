@@ -29,3 +29,6 @@ class LabelsPage(BaseListPage):
 
     def get_labels_text(self) -> list[str]:
         return self.get_texts(self.NAME_COLUMN)
+
+    def label_not_in_table(self, name: str) -> bool:
+        return self.wait_for_absence(self.locator_name_constructor(name))
