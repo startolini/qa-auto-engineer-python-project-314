@@ -74,7 +74,13 @@ class TasksPage(BasePage):
     def select_option(self, input_name: str, option_text: str):
         """Open a MUI select by its hidden input name and pick an option"""
         self.click(self.locator_select_constructor(input_name))
-        self.click(self.locator_option_constructor(option_text))
+        self._click_option(self.locator_option_constructor(option_text))
+
+    def _click_option(self, locator: tuple):
+        """Click a menu option via JS: MUI animates the open menu, so a
+        native click can be intercepted by a neighbouring option"""
+        option = self.wait.until(EC.element_to_be_clickable(locator))
+        self.by_js.click(option)
 
     def create_task(self, title: str, assignee: str, status: str, content: str = ""):
         """Fill the creation form and save"""
@@ -110,7 +116,7 @@ class TasksPage(BasePage):
 
     def clear_filter(self, input_name: str):
         self.click(self.locator_select_constructor(input_name))
-        self.click(self.CLEAR_FILTER_OPTION)
+        self._click_option(self.CLEAR_FILTER_OPTION)
 
     # Доска
     def get_board_card_count(self) -> int:
