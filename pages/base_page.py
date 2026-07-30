@@ -35,14 +35,17 @@ class BasePage:
         el.send_keys(text)
 
     def get_text(self, locator: tuple) -> str:
-        return self.find_element(locator).text
+        el = self.wait.until(EC.visibility_of_element_located(locator))
+        return el.text
 
     def get_texts(self, locator: tuple) -> list[str]:
+        self.wait.until(EC.presence_of_element_located(locator))
         elements = self.find_elements(locator)
         return [el.text for el in elements]
 
     def get_dom_attribute(self, locator: tuple, name: str) -> str | None:
-        value = self.find_element(locator).get_dom_attribute(name)
+        el = self.wait.until(EC.presence_of_element_located(locator))
+        value = el.get_dom_attribute(name)
         if value == "":
             return None
         return value
