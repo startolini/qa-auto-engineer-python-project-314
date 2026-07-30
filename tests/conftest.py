@@ -1,12 +1,11 @@
 import os
 import pathlib
+import sys
 import pytest
-import allure
 import shutil
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from dotenv import load_dotenv
 from datetime import datetime
 
 from pages.login_page import LoginPage
@@ -16,10 +15,36 @@ from pages.task_statuses_page import TaskStatusesPage
 from pages.labels_page import LabelsPage
 from pages.tasks_page import TasksPage
 
-load_dotenv()
+# allure и dotenv опциональны: в среде проверки Hexlet их нет
+try:
+    import allure
+except ImportError:
+    allure = None
+
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    pass
+
+DEFAULT_APP_BASE_URL = "http://localhost:5173"
+DEFAULT_LOGIN_PATH = "/#/login"
+
+
+def _headless_enabled() -> bool:
+    """HEADLESS=1/0 задаёт режим явно; по умолчанию headless включается
+    на Linux без дисплея (CI)."""
+    value = os.environ.get("HEADLESS")
+    if value is not None:
+        return value.lower() in ("1", "true", "yes")
+    return sys.platform == "linux" and not os.environ.get("DISPLAY")
 
 
 def pytest_configure(config):
+    if not config.pluginmanager.hasplugin("allure_pytest"):
+        return
+
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     out_dir = pathlib.Path(f"reports/allure-results-{timestamp}")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -38,7 +63,7 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
 
-    if rep.when == "call" and rep.failed:
+    if allure and rep.when == "call" and rep.failed:
         driver = item.funcargs.get("driver")
 
         if driver:
@@ -51,14 +76,12 @@ def pytest_runtest_makereport(item, call):
 
 @pytest.fixture
 def base_url():
-    return os.environ.get("APP_BASE_URL")
+    return os.environ.get("APP_BASE_URL", DEFAULT_APP_BASE_URL)
 
 
 @pytest.fixture
-def login_url():
-    base = os.environ.get("APP_BASE_URL") or ""
-    path = os.environ.get("LOGIN_PATH") or ""
-    return base + path
+def login_url(base_url):
+    return base_url + os.environ.get("LOGIN_PATH", DEFAULT_LOGIN_PATH)
 
 
 @pytest.fixture
@@ -68,7 +91,8 @@ def driver(request):
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-infobars")
-    # options.add_argument("--headless")
+    if _headless_enabled():
+        options.add_argument("--headless=new")
     options.add_argument("--disable-gpu")
     options.add_argument("--allow-insecure-localhost")
     options.add_argument("--disable-web-security")
