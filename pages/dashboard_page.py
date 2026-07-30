@@ -8,6 +8,17 @@ class DashboardPage(BasePage):
         By.XPATH,
         "//ul[contains(@class, 'MuiList-root')]//span[normalize-space(text())='Logout']",
     )
+    APP_BAR_TITLE = (By.ID, "react-admin-title")
+    WELCOME_CARD = (By.CSS_SELECTOR, ".MuiCardContent-root")
+
+    def get_title_text(self) -> str:
+        return self.get_text(self.APP_BAR_TITLE)
+
+    def get_welcome_card_text(self) -> str:
+        return self.get_text(self.WELCOME_CARD)
+
+    def profile_button_visible(self) -> bool:
+        return self.is_visible(self.PROFILE)
 
     def logout(self) -> None:
         self.click(self.PROFILE)
