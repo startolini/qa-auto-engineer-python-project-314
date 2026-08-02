@@ -53,6 +53,7 @@ class TasksPage(BasePage):
     CLEAR_FILTER_OPTION = (By.CSS_SELECTOR, 'li[aria-label="Clear value"]')
 
     ALL_TASK_CARDS = (By.XPATH, "//div[@data-rfd-draggable-id]")
+    COLUMN_TITLES = (By.XPATH, "//div[@class='MuiBox-root css-1xphtog']//h6")
     CARD_TITLE = (By.XPATH, ".//div[contains(@class, 'MuiTypography-h5')]")
     CARD_DESCRIPTION = (By.XPATH, ".//p[contains(@class, 'MuiTypography-body2')]")
     CARD_INDEX = (By.XPATH, ".//p[contains(@class, 'MuiTypography-body1')]")
@@ -143,47 +144,32 @@ class TasksPage(BasePage):
         locator = self.locator_card_in_column_constructor(title, column)
         return self.wait_for_absence(locator)
 
+    def get_column_names(self) -> list[str]:
+        """Get titles of all board columns"""
+        return self.get_texts(self.COLUMN_TITLES)
+
+    def get_cards_in_column(self, column: str):
+        """Get all task cards in the given column"""
+        column_el = self.find_element(self.locator_column_constructor(column))
+        return column_el.find_elements(By.XPATH, ".//div[@data-rfd-draggable-id]")
+
+    def get_card_info_in_column(self, column: str) -> list[dict]:
+        """Get complete info for all cards in the given column"""
+        cards_info = []
+        for card in self.get_cards_in_column(column):
+            cards_info.append(
+                {
+                    "id": card.get_attribute("data-rfd-draggable-id"),
+                    "title": card.find_element(*self.CARD_TITLE).text,
+                    "description": card.find_element(*self.CARD_DESCRIPTION).text,
+                    "index": card.find_element(*self.CARD_INDEX).text,
+                }
+            )
+        return cards_info
+
     def get_all_cards_in_draft(self):
         """Get all task cards in Draft column"""
-        draft_column = self.find_element(self.locator_column_constructor("Draft"))
-        cards = draft_column.find_elements(By.XPATH, ".//div[@data-rfd-draggable-id]")
-        return cards
-
-    def get_card_titles_in_draft(self):
-        """Get titles of all cards in Draft column"""
-        cards = self.get_all_cards_in_draft()
-        titles = []
-        for card in cards:
-            title_element = card.find_element(*self.CARD_TITLE)
-            titles.append(title_element.text)
-        return titles
-
-    def get_card_info_in_draft(self):
-        """Get complete info for all cards in Draft column"""
-        cards = self.get_all_cards_in_draft()
-        cards_info = []
-
-        for card in cards:
-            try:
-                title = card.find_element(*self.CARD_TITLE).text
-                description = card.find_element(*self.CARD_DESCRIPTION).text
-                index = card.find_element(*self.CARD_INDEX).text
-                card_id = card.get_attribute("data-rfd-draggable-id")
-
-                cards_info.append(
-                    {
-                        "id": card_id,
-                        "title": title,
-                        "description": description,
-                        "index": index,
-                        "element": card,
-                    }
-                )
-            except Exception as e:
-                print(f"Error getting card info: {e}")
-                continue
-
-        return cards_info
+        return self.get_cards_in_column("Draft")
 
     def get_card_count_in_draft(self):
         """Get number of cards in Draft column"""

@@ -5,7 +5,7 @@ allure-report:
 	allure serve $$(ls -td reports/allure-results-* | head -1)
 
 test:
-	uv run pytest && allure serve $$(ls -td reports/allure-results-* | head -1)
+	uv run pytest
 
 smoke:
 	uv run pytest -m smoke

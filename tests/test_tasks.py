@@ -33,23 +33,27 @@ def test_create_task(tasks_page):
 
 @pytest.mark.smoke
 def test_view_all_tasks(tasks_page):
-    """All cards in the Draft column are loaded with their key fields"""
+    """Cards in every column are loaded with their key fields"""
     tasks_page.wait_for_cards_loaded()
 
-    cards = tasks_page.get_all_cards_in_draft()
-    assert len(cards) > 0, "Should have at least one task card"
+    columns = tasks_page.get_column_names()
+    assert columns, "Board should have at least one column"
 
-    titles = tasks_page.get_card_titles_in_draft()
-    assert len(titles) == len(cards), "Number of titles should match number of cards"
+    total_cards = 0
+    for column in columns:
+        for card_info in tasks_page.get_card_info_in_column(column):
+            total_cards += 1
+            assert card_info["title"], f"Card in '{column}' should have title"
+            assert card_info["description"], (
+                f"Card in '{column}' should have description"
+            )
+            assert card_info["index"], f"Card in '{column}' should have index"
+            assert card_info["id"], f"Card in '{column}' should have id"
 
-    cards_info = tasks_page.get_card_info_in_draft()
-    assert len(cards_info) == len(cards), "Every card should expose its info"
-
-    for card_info in cards_info:
-        assert card_info["title"], "Card should have title"
-        assert card_info["description"], "Card should have description"
-        assert card_info["index"], "Card should have index"
-        assert card_info["id"], "Card should have id"
+    assert total_cards > 0, "Board should have at least one task card"
+    assert total_cards == tasks_page.get_board_card_count(), (
+        "Cards in columns should account for all cards on the board"
+    )
 
 
 @pytest.mark.smoke
